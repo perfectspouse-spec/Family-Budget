@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -142,7 +143,7 @@ fun ReceiptOcrReviewDialog(
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    // Header with AI OCR Badge and Close Button
+                    // Header with Close Button, Title/Badge and Top Save Button
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
                         tonalElevation = 2.dp,
@@ -151,56 +152,84 @@ fun ReceiptOcrReviewDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Surface(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(8.dp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f, fill = false)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                IconButton(
+                                    onClick = onDismiss,
+                                    modifier = Modifier.testTag("cancel_ocr_dialog_button")
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Icon(Icons.Default.Close, contentDescription = strings.cancel)
+                                }
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Column {
                                     Text(
-                                        text = "Gemini AI OCR Ayrıştırma",
-                                        fontSize = 11.sp,
+                                        text = strings.reviewScannedReceipt,
+                                        style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.AutoAwesome,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(3.dp))
+                                        Text(
+                                            text = "Gemini AI OCR Ayrıştırma",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
                             }
 
-                            IconButton(onClick = onDismiss) {
-                                Icon(Icons.Default.Close, contentDescription = strings.cancel)
+                            Button(
+                                onClick = {
+                                    onConfirm(
+                                        merchantName,
+                                        receiptDate,
+                                        category,
+                                        vatRate,
+                                        activeVatTotal,
+                                        calculatedTotal,
+                                        selectedMemberId,
+                                        selectedMemberName,
+                                        "Kredi Kartı",
+                                        itemsList.toList()
+                                    )
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF00695C),
+                                    contentColor = Color.White
+                                ),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+                                modifier = Modifier
+                                    .height(44.dp)
+                                    .testTag("save_ocr_receipt_button")
+                                    .testTag("confirm_ocr_receipt_button")
+                            ) {
+                                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = strings.saveReceipt,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = strings.reviewScannedReceipt,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Ayrıştırılan firma, ürün, KDV ve iptal kalemlerini kontrol edin.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
 
                     Box(
@@ -572,80 +601,8 @@ fun ReceiptOcrReviewDialog(
                         }
                     }
                 }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    )
-
-                    // Sticky Bottom Action Bar (Always visible)
-                    Surface(
-                        color = MaterialTheme.colorScheme.surface,
-                        tonalElevation = 6.dp,
-                        shadowElevation = 8.dp,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedButton(
-                                onClick = onDismiss,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(52.dp)
-                                    .testTag("cancel_ocr_dialog_button"),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(strings.cancel, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                            }
-
-                            Button(
-                                onClick = {
-                                    onConfirm(
-                                        merchantName,
-                                        receiptDate,
-                                        category,
-                                        vatRate,
-                                        activeVatTotal,
-                                        calculatedTotal,
-                                        selectedMemberId,
-                                        selectedMemberName,
-                                        "Kredi Kartı",
-                                        itemsList.toList()
-                                    )
-                                },
-                                modifier = Modifier
-                                    .weight(1.7f)
-                                    .height(52.dp)
-                                    .testTag("save_ocr_receipt_button")
-                                    .testTag("confirm_ocr_receipt_button"),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF00695C),
-                                    contentColor = Color.White
-                                ),
-                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
-                            ) {
-                                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(20.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = strings.saveReceipt,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                }
             }
         }
     }
+}
 }

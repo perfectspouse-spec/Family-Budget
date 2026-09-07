@@ -66,6 +66,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -232,7 +233,7 @@ fun ManualExpenseDialog(
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    // Header (Fixed at top)
+                    // Header (Fixed at top with Save Button)
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
                         tonalElevation = 2.dp,
@@ -241,43 +242,89 @@ fun ManualExpenseDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Surface(
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    modifier = Modifier.size(36.dp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f, fill = false)
+                            ) {
+                                IconButton(
+                                    onClick = onDismiss,
+                                    modifier = Modifier.testTag("cancel_manual_expense_button")
                                 ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Default.Edit,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
+                                    Icon(Icons.Default.Close, contentDescription = strings.cancel)
                                 }
-                                Spacer(modifier = Modifier.width(10.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
                                 Column {
                                     Text(
                                         text = strings.manualExpense,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = "Fiş detaylarını girip kaydedin",
+                                        text = "Fiş detaylarını girin",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 11.sp
+                                        fontSize = 11.sp,
+                                        maxLines = 1
                                     )
                                 }
                             }
-                            IconButton(onClick = onDismiss) {
-                                Icon(Icons.Default.Close, contentDescription = strings.cancel)
+
+                            Button(
+                                onClick = {
+                                    val finalMerchant = if (merchantName.isNotBlank()) merchantName else "Manuel Gider"
+                                    val finalItems = if (isDetailedMode && itemsList.isNotEmpty()) {
+                                        itemsList.toList()
+                                    } else {
+                                        listOf(
+                                            ParsedReceiptItem(
+                                                productName = merchantName.ifBlank { "Fiş Harcaması" },
+                                                quantity = parsedQuantity,
+                                                unitPrice = if (parsedUnitPrice > 0) parsedUnitPrice else effectiveTotal,
+                                                totalPrice = effectiveTotal,
+                                                vatRate = selectedVatRate,
+                                                category = selectedCategory
+                                            )
+                                        )
+                                    }
+                                    onSave(
+                                        finalMerchant,
+                                        receiptDate,
+                                        selectedCategory,
+                                        selectedVatRate,
+                                        calculatedVatAmount,
+                                        effectiveTotal,
+                                        selectedMemberId,
+                                        selectedMemberName,
+                                        paymentMethod,
+                                        finalItems,
+                                        note.takeIf { it.isNotBlank() }
+                                    )
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF00695C),
+                                    contentColor = Color.White
+                                ),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+                                modifier = Modifier
+                                    .height(44.dp)
+                                    .testTag("save_manual_expense_button")
+                            ) {
+                                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = strings.saveReceipt,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }
@@ -948,93 +995,6 @@ fun ManualExpenseDialog(
                             shape = RoundedCornerShape(12.dp)
                         )
                     }
-                }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    )
-
-                    // Sticky Bottom Action Bar (Always visible)
-                    Surface(
-                        color = MaterialTheme.colorScheme.surface,
-                        tonalElevation = 6.dp,
-                        shadowElevation = 8.dp,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedButton(
-                                onClick = onDismiss,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(52.dp)
-                                    .testTag("cancel_manual_expense_button"),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(strings.cancel, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                            }
-
-                            Button(
-                                onClick = {
-                                    val finalMerchant = if (merchantName.isNotBlank()) merchantName else "Manuel Gider"
-                                    val finalItems = if (isDetailedMode && itemsList.isNotEmpty()) {
-                                        itemsList.toList()
-                                    } else {
-                                        listOf(
-                                            ParsedReceiptItem(
-                                                productName = merchantName.ifBlank { "Fiş Harcaması" },
-                                                quantity = parsedQuantity,
-                                                unitPrice = if (parsedUnitPrice > 0) parsedUnitPrice else effectiveTotal,
-                                                totalPrice = effectiveTotal,
-                                                vatRate = selectedVatRate,
-                                                category = selectedCategory
-                                            )
-                                        )
-                                    }
-                                    onSave(
-                                        finalMerchant,
-                                        receiptDate,
-                                        selectedCategory,
-                                        selectedVatRate,
-                                        calculatedVatAmount,
-                                        effectiveTotal,
-                                        selectedMemberId,
-                                        selectedMemberName,
-                                        paymentMethod,
-                                        finalItems,
-                                        note.takeIf { it.isNotBlank() }
-                                    )
-                                },
-                                modifier = Modifier
-                                    .weight(1.7f)
-                                    .height(52.dp)
-                                    .testTag("save_manual_expense_button"),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF00695C),
-                                    contentColor = Color.White
-                                ),
-                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
-                            ) {
-                                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(20.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = strings.saveReceipt,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
                     }
                 }
             }
