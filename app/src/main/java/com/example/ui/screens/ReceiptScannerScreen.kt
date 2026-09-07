@@ -503,10 +503,32 @@ fun CameraXLivePreview(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val previewView = remember { PreviewView(context) }
+    val previewView = remember {
+        PreviewView(context).apply {
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        }
+    }
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var cameraControl by remember { mutableStateOf<CameraControl?>(null) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+
+    DisposableEffect(lifecycleOwner) {
+        onDispose {
+            try {
+                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+                cameraProviderFuture.addListener({
+                    try {
+                        cameraProviderFuture.get().unbindAll()
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
+                    }
+                }, ContextCompat.getMainExecutor(context))
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
+            cameraExecutor.shutdown()
+        }
+    }
 
     LaunchedEffect(useFrontCamera) {
         try {

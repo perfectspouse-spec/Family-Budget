@@ -57,6 +57,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -317,9 +318,31 @@ fun CameraPreviewContainer(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val previewView = remember { PreviewView(context) }
+    val previewView = remember {
+        PreviewView(context).apply {
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        }
+    }
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+
+    DisposableEffect(lifecycleOwner) {
+        onDispose {
+            try {
+                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+                cameraProviderFuture.addListener({
+                    try {
+                        cameraProviderFuture.get().unbindAll()
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
+                    }
+                }, ContextCompat.getMainExecutor(context))
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
+            cameraExecutor.shutdown()
+        }
+    }
 
     LaunchedEffect(Unit) {
         try {
