@@ -1,0 +1,8 @@
+{
+  "name": "Aile Bütçesi",
+  "description": "Fiş OCR tarama, aile bireyleri yönetimi, dinamik bütçe limitleri, ürün fiyat artış trendi ve detaylı harcama raporlaması sunan akıllı aile bütçesi takibi.",
+  "requestFramePermissions": [
+    "android.permission.CAMERA"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

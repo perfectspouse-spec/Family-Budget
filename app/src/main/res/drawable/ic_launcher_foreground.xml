@@ -1,0 +1,38 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="18"
+        android:translateY="18"
+        android:scaleX="0.666"
+        android:scaleY="0.666">
+        <!-- Receipt Top Card with Zig-zag top -->
+        <path
+            android:fillColor="#E0F2F1"
+            android:pathData="M34,22 L74,22 C76.2,22 78,23.8 78,26 L78,54 L30,54 L30,26 C30,23.8 31.8,22 34,22 Z" />
+        <!-- Receipt Lines -->
+        <path
+            android:fillColor="#00796B"
+            android:pathData="M38,30 L70,30 A2,2 0 0,1 70,34 L38,34 A2,2 0 0,1 38,30 Z
+                             M38,38 L62,38 A2,2 0 0,1 62,42 L38,42 A2,2 0 0,1 38,38 Z
+                             M38,46 L54,46 A2,2 0 0,1 54,50 L38,50 A2,2 0 0,1 38,46 Z" />
+        <!-- Main Wallet Body -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M22,46 L86,46 C90.4,46 94,49.6 94,54 L94,82 C94,86.4 90.4,90 86,90 L22,90 C17.6,90 14,86.4 14,82 L14,54 C14,49.6 17.6,46 22,46 Z" />
+        <!-- Wallet Flap Accent -->
+        <path
+            android:fillColor="#00BFA5"
+            android:pathData="M64,60 L92,60 C93.1,60 94,60.9 94,62 L94,76 C94,77.1 93.1,78 92,78 L64,78 C59.6,78 56,74.4 56,70 C56,65.6 59.6,60 64,60 Z" />
+        <!-- Golden Coin Button on Flap -->
+        <path
+            android:fillColor="#FFD54F"
+            android:pathData="M68,69m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0" />
+        <!-- Rising Analytics Graph inside Wallet -->
+        <path
+            android:fillColor="#00897B"
+            android:pathData="M24,78 L34,70 L44,74 L52,64 L52,78 Z" />
+    </group>
+</vector>
